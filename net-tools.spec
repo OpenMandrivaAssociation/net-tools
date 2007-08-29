@@ -1,7 +1,7 @@
 Summary:	The basic tools for setting up networking
 Name:		net-tools
 Version:	1.60
-Release:	%mkrel 19
+Release:	%mkrel 20
 License:	GPL
 Group:		System/Configuration/Networking
 URL:		http://www.tazenda.demon.co.uk/phil/net-tools/
@@ -49,6 +49,7 @@ Patch38:	net-tools-1.60-ifaceopt.patch
 Patch39:	net-tools-1.60-trim_iface.patch
 Patch40:	net-tools-1.60-stdo.patch
 Patch41:	net-tools-1.60-statistics.patch
+Patch42:	net-tools-1.60-netdevice.patch
 BuildRequires:	gettext
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
@@ -95,6 +96,7 @@ networking:  ifconfig, netstat, route and others.
 %patch39 -p1 -b .trim-iface
 %patch40 -p1 -b .stdo
 %patch41 -p1 -b .statistics
+%patch42 -p1 -b .netdevice
 
 cp %{SOURCE2} config.h
 cp %{SOURCE3} config.make
@@ -175,5 +177,3 @@ install -m 644 %{SOURCE8} %{buildroot}%{_sysconfdir}/bash_completion.d/%{name}
 %lang(de) %{_mandir}/de/man[158]/*
 %lang(fr) %{_mandir}/fr/man[158]/*
 %lang(pt) %{_mandir}/pt/man[158]/*
-
-
