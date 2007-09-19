@@ -1,7 +1,7 @@
 Summary:	The basic tools for setting up networking
 Name:		net-tools
 Version:	1.60
-Release:	%mkrel 20
+Release:	%mkrel 21
 License:	GPL
 Group:		System/Configuration/Networking
 URL:		http://www.tazenda.demon.co.uk/phil/net-tools/
@@ -13,6 +13,7 @@ Source5:	ether-wake.8
 Source6:	mii-diag.c
 Source7:	mii-diag.8
 Source8:	%{name}.bash-completion
+Source9:        bin.netstat.apparmor
 Patch1:		net-tools-1.57-bug22040.patch
 Patch2:		net-tools-1.60-miiioctl.patch
 Patch3:		net-tools-1.60-manydevs.patch
@@ -51,6 +52,7 @@ Patch40:	net-tools-1.60-stdo.patch
 Patch41:	net-tools-1.60-statistics.patch
 Patch42:	net-tools-1.60-netdevice.patch
 BuildRequires:	gettext
+Conflicts:      apparmor-profiles < 2.1-1.961.5mdv2008.0
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
@@ -162,7 +164,17 @@ rm %{buildroot}%{_mandir}/*/man8/rarp.8*
 install -d -m 755 %{buildroot}%{_sysconfdir}/bash_completion.d
 install -m 644 %{SOURCE8} %{buildroot}%{_sysconfdir}/bash_completion.d/%{name}
 
+# apparmor profile
+mkdir -p %{buildroot}%{_sysconfdir}/apparmor.d
+install -m 0644 %{SOURCE9} %{buildroot}%{_sysconfdir}/apparmor.d/bin.netstat
+
 %find_lang %{name}
+
+%posttrans
+# if we have apparmor installed, reload if it's being used
+if [ -x /sbin/apparmor_parser ]; then
+        /sbin/service apparmor condreload
+fi
 
 %clean
 [ "%{buildroot}" != "/" ] && rm -rf %{buildroot}
@@ -170,6 +182,7 @@ install -m 644 %{SOURCE8} %{buildroot}%{_sysconfdir}/bash_completion.d/%{name}
 %files -f %{name}.lang
 %defattr(-,root,root)
 %doc README README.ipv6 TODO INSTALLING ABOUT-NLS
+%config(noreplace) %{_sysconfdir}/apparmor.d/bin.netstat
 %{_sysconfdir}/bash_completion.d/%{name}
 /bin/*
 /sbin/*
