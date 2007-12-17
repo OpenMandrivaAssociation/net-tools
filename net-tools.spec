@@ -53,7 +53,6 @@ Patch41:	net-tools-1.60-statistics.patch
 Patch42:	net-tools-1.60-netdevice.patch
 BuildRequires:	gettext
 Conflicts:      apparmor-profiles < 2.1-1.961.5mdv2008.0
-BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
 The net-tools package contains the basic tools needed for setting up
