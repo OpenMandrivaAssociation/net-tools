@@ -26,6 +26,7 @@ Patch9:		net-tools-1.60-man.patch
 Patch10:	net-tools-1.60-gcc33.patch
 Patch11:	net-tools-1.60-trailingblank.patch
 Patch12:	net-tools-1.60-interface.patch
+# x25 patch is split out of Fedora netdevice patch
 Patch13:	net-tools-1.60-x25.patch
 Patch14:	net-tools-1.60-gcc34.patch
 Patch15:	net-tools-1.60-overflow.patch
@@ -50,7 +51,8 @@ Patch38:	net-tools-1.60-ifaceopt.patch
 Patch39:	net-tools-1.60-trim_iface.patch
 Patch40:	net-tools-1.60-stdo.patch
 Patch41:	net-tools-1.60-statistics.patch
-Patch42:	net-tools-1.60-netdevice.patch
+# x25 part of Fedora netdevice patch has been split out in its own x25 patch
+Patch55:	net-tools-1.60-netdevice.patch
 BuildRequires:	gettext
 Conflicts:      apparmor-profiles < 2.1-1.961.5mdv2008.0
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -97,7 +99,7 @@ networking:  ifconfig, netstat, route and others.
 %patch39 -p1 -b .trim-iface
 %patch40 -p1 -b .stdo
 %patch41 -p1 -b .statistics
-%patch42 -p1 -b .netdevice
+%patch55 -p1 -b .netdevice
 
 cp %SOURCE2 ./config.h
 cp %SOURCE3 ./config.make
