@@ -60,7 +60,6 @@ The net-tools package contains the basic tools needed for setting up
 networking:  ifconfig, netstat, route and others.
 
 %prep
-
 %setup -q
 %patch1 -p1 -b .bug22040
 %patch2 -p1 -b .miiioctl
@@ -146,7 +145,6 @@ iconv -f iso-8859-1 -t utf-8 -o slattach.tmp man/de_DE/slattach.8 && mv slattach
 
 %install
 rm -rf $RPM_BUILD_ROOT
-
 mv man/de_DE man/de
 mv man/fr_FR man/fr
 mv man/pt_BR man/pt
