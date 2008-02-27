@@ -99,12 +99,12 @@ networking:  ifconfig, netstat, route and others.
 %patch41 -p1 -b .statistics
 %patch42 -p1 -b .netdevice
 
-cp %{SOURCE2} config.h
-cp %{SOURCE3} config.make
-cp %{SOURCE4} ether-wake.c
-cp %{SOURCE5} man/en_US/ether-wake.8
-cp %{SOURCE6} mii-diag.c
-cp %{SOURCE7} man/en_US/mii-diag.8
+cp %SOURCE2 ./config.h
+cp %SOURCE3 ./config.make
+cp %SOURCE4 ./ether-wake.c
+cp %SOURCE5 ./man/en_US/ether-wake.8
+cp %SOURCE6 ./mii-diag.c
+cp %SOURCE7 ./man/en_US/mii-diag.8
 
 %ifarch alpha
 perl -pi -e "s|-O2||" Makefile
