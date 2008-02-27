@@ -44,15 +44,41 @@ Patch29:	net-tools-1.60-num-ports.patch
 Patch30:	net-tools-1.60-duplicate-tcp.patch
 Patch31:	net-tools-1.60-statalias.patch
 Patch32:	net-tools-1.60-isofix.patch
+# this Fedora patch is for netplug, unneeded in Mandriva
+#Patch33:	net-tools-1.60-bitkeeper.patch
 Patch34:	net-tools-1.60-ifconfig_ib.patch
 Patch35:	net-tools-1.60-de.patch
+# this Fedora patch is for netplug, unneeded in Mandriva
+#Patch36:	netplug-1.2.9-execshield.patch
 Patch37:	net-tools-1.60-pie.patch
 Patch38:	net-tools-1.60-ifaceopt.patch
 Patch39:	net-tools-1.60-trim_iface.patch
 Patch40:	net-tools-1.60-stdo.patch
 Patch41:	net-tools-1.60-statistics.patch
+Patch42:	net-tools-1.60-ifconfig.patch
+Patch43:	net-tools-1.60-arp_overflow.patch
+Patch44:	net-tools-1.60-hostname_man.patch
+Patch45:	net-tools-1.60-interface_stack.patch
+Patch46:	net-tools-1.60-selinux.patch
+Patch47:	net-tools-1.60-netstat_stop_trim.patch
+Patch48:	net-tools-1.60-netstat_inode.patch
+Patch49:	net-tools-1.60-fgets.patch
+Patch50:	net-tools-1.60-ifconfig_man.patch
+Patch51:	net-tools-1.60-x25-proc.patch
+Patch52:	net-tools-1.60-sctp.patch
+Patch53:	net-tools-1.60-arp_man.patch
+Patch54:	net-tools-1.60-ifconfig-long-iface-crasher.patch
 # x25 part of Fedora netdevice patch has been split out in its own x25 patch
 Patch55:	net-tools-1.60-netdevice.patch
+Patch56:	net-tools-1.60-skip.patch
+Patch57:	net-tools-1.60-netstat-I-fix.patch
+Patch58:	net-tools-1.60-nameif_strncpy.patch
+Patch59:	net-tools-1.60-arp-unaligned-access.patch
+Patch60:	net-tools-1.60-sctp-quiet.patch
+Patch61:	net-tools-1.60-remove_node.patch
+Patch62:	net-tools-1.60-netstat-interfaces-crash.patch
+#Patch63:	net-tools-1.60-netplugd_init.patch
+Patch64:	net-tools-1.60-ec_hw_null.patch
 BuildRequires:	gettext
 Conflicts:      apparmor-profiles < 2.1-1.961.5mdv2008.0
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -92,14 +118,38 @@ networking:  ifconfig, netstat, route and others.
 %patch30 -p1 -b .dup-tcp
 %patch31 -p1 -b .statalias
 %patch32 -p1 -b .isofix
+#%patch33 -p1 -b .bitkeeper
 %patch34 -p1 -b .ifconfig_ib
 %patch35 -p1 
+#%patch36 -p1 -b .execshield
 %patch37 -p1 -b .pie
 %patch38 -p1 -b .ifaceopt
 %patch39 -p1 -b .trim-iface
 %patch40 -p1 -b .stdo
 %patch41 -p1 -b .statistics
+%patch42 -p1 -b .iface_drop
+%patch43 -p1 -b .overflow
+%patch44 -p1 -b .hostname_man
+%patch45 -p0 -b .stack
+%patch46 -p1 -b .selinux
+%patch47 -p1 -b .trim
+%patch48 -p1 -b .inode
+%patch49 -p1 -b .fgets
+%patch50 -p1 -b .inet_addr
+%patch51 -p1 -b .x25
+%patch52 -p1 -b .sctp
+%patch53 -p1
+%patch54 -p1 -b .long_iface
 %patch55 -p1 -b .netdevice
+%patch56 -p1 -b .skip
+%patch57 -p1
+%patch58 -p1 -b .strncpy
+%patch59 -p1 -b .arp-un-access
+%patch60 -p1 -b .quiet
+%patch61 -p1
+%patch62 -p1 -b .iface-crash
+#%patch63 -p1
+%patch64 -p1
 
 cp %SOURCE2 ./config.h
 cp %SOURCE3 ./config.make
