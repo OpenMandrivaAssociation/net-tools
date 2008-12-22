@@ -1,7 +1,7 @@
 Summary:	The basic tools for setting up networking
 Name:		net-tools
 Version:	1.60
-Release:	%mkrel 28
+Release:	%mkrel 29
 License:	GPL
 Group:		System/Configuration/Networking
 URL:		http://www.tazenda.demon.co.uk/phil/net-tools/
@@ -79,6 +79,7 @@ Patch61:	net-tools-1.60-remove_node.patch
 Patch62:	net-tools-1.60-netstat-interfaces-crash.patch
 #Patch63:	net-tools-1.60-netplugd_init.patch
 Patch64:	net-tools-1.60-ec_hw_null.patch
+Patch65:	net-tools-1.60-format_not_a_string_literal_and_no_format_arguments.diff
 BuildRequires:	gettext
 Conflicts:      apparmor-profiles < 2.1-1.961.5mdv2008.0
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -115,7 +116,7 @@ networking:  ifconfig, netstat, route and others.
 %patch27 -p1 -b .netstat_ulong
 %patch28 -p1 -b .note
 %patch29 -p1 -b .num-ports
-%patch30 -p1 -b .dup-tcp
+%patch30 -p0 -b .dup-tcp
 %patch31 -p1 -b .statalias
 %patch32 -p1 -b .isofix
 #%patch33 -p1 -b .bitkeeper
@@ -139,7 +140,7 @@ networking:  ifconfig, netstat, route and others.
 %patch51 -p1 -b .x25
 %patch52 -p1 -b .sctp
 %patch53 -p1
-%patch54 -p1 -b .long_iface
+%patch54 -p0 -b .long_iface
 %patch55 -p1 -b .netdevice
 %patch56 -p1 -b .skip
 %patch57 -p1
@@ -158,16 +159,20 @@ cp %SOURCE5 ./man/en_US/ether-wake.8
 cp %SOURCE6 ./mii-diag.c
 cp %SOURCE7 ./man/en_US/mii-diag.8
 
+%patch65 -p1 -b .format_not_a_string_literal_and_no_format_arguments
+
 %ifarch alpha
 perl -pi -e "s|-O2||" Makefile
 %endif
 
 %build
 export CFLAGS="%{optflags} $CFLAGS"
+export LDFLAGS="%{ldflags} $LDFLAGS"
 
 make
-gcc %{optflags} -o ether-wake ether-wake.c
-gcc %{optflags} -o mii-diag mii-diag.c
+
+gcc %{optflags} %{ldflags} -o ether-wake ether-wake.c
+gcc %{optflags} %{ldflags} -o mii-diag mii-diag.c
 
 #man pages conversion
 #french 
