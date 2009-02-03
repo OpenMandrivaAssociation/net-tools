@@ -1,7 +1,7 @@
 Summary:	The basic tools for setting up networking
 Name:		net-tools
 Version:	1.60
-Release:	%mkrel 29
+Release:	%mkrel 30
 License:	GPL
 Group:		System/Configuration/Networking
 URL:		http://www.tazenda.demon.co.uk/phil/net-tools/
@@ -12,7 +12,6 @@ Source4:	ether-wake.c
 Source5:	ether-wake.8
 Source6:	mii-diag.c
 Source7:	mii-diag.8
-Source8:	%{name}.bash-completion
 Source9:        bin.netstat.apparmor
 Patch1:		net-tools-1.57-bug22040.patch
 Patch2:		net-tools-1.60-miiioctl.patch
@@ -215,10 +214,6 @@ rm %{buildroot}/sbin/rarp
 rm %{buildroot}%{_mandir}/man8/rarp.8*
 rm %{buildroot}%{_mandir}/*/man8/rarp.8*
 
-# bash completion
-install -d -m 755 %{buildroot}%{_sysconfdir}/bash_completion.d
-install -m 644 %{SOURCE8} %{buildroot}%{_sysconfdir}/bash_completion.d/%{name}
-
 # apparmor profile
 mkdir -p %{buildroot}%{_sysconfdir}/apparmor.d
 install -m 0644 %{SOURCE9} %{buildroot}%{_sysconfdir}/apparmor.d/bin.netstat
@@ -238,7 +233,6 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 %doc README README.ipv6 TODO INSTALLING ABOUT-NLS
 %config(noreplace) %{_sysconfdir}/apparmor.d/bin.netstat
-%{_sysconfdir}/bash_completion.d/%{name}
 /bin/*
 /sbin/*
 %{_mandir}/man[158]/*
