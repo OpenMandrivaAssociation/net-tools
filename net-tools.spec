@@ -1,7 +1,7 @@
 Summary:	The basic tools for setting up networking
 Name:		net-tools
 Version:	1.60
-Release:	%mkrel 31
+Release:	%mkrel 32
 License:	GPL
 Group:		System/Configuration/Networking
 URL:		http://www.tazenda.demon.co.uk/phil/net-tools/
@@ -78,7 +78,26 @@ Patch61:	net-tools-1.60-remove_node.patch
 Patch62:	net-tools-1.60-netstat-interfaces-crash.patch
 #Patch63:	net-tools-1.60-netplugd_init.patch
 Patch64:	net-tools-1.60-ec_hw_null.patch
-Patch65:	net-tools-1.60-format_not_a_string_literal_and_no_format_arguments.diff
+Patch65:    net-tools-1.60-statistics_buffer.patch
+Patch66:    net-tools-1.60-sctp-addrs.patch
+Patch67:    net-tools-1.60-i-option.patch
+Patch68:    net-tools-1.60-a-option.patch
+Patch69:    net-tools-1.60-clear-flag.patch
+Patch70:    net-tools-1.60-metric-tunnel-man.patch
+Patch71:    net-tools-1.60-netstat-probe.patch 
+Patch72:    net-tools-1.60-scanf-format.patch 
+Patch73:    net-tools-1.60-avoid-name-resolution.patch 
+Patch74:    net-tools-1.60-continous-flush-stdout.patch 
+Patch75:    net-tools-1.60-debug-fix.patch 
+Patch76:    net-tools-1.60-ib-warning.patch 
+Patch77:    net-tools-1.60-man-obsolete.patch 
+Patch78:    net-tools-1.60-man-RHEL-bugs.patch 
+Patch79:    net-tools-1.60-masqinfo-raw-ip.patch 
+Patch80:    net-tools-1.60-makefile-berlios.patch 
+Patch81:    net-tools-1.60-slattach-fchown.patch 
+Patch82:    net-tools-1.60-hostname-short.patch 
+Patch83:    net-tools-1.60-mii-refactor.patch 
+Patch100:	net-tools-1.60-format_not_a_string_literal_and_no_format_arguments.diff
 BuildRequires:	gettext
 Conflicts:      apparmor-profiles < 2.1-1.961.5mdv2008.0
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -150,6 +169,25 @@ networking:  ifconfig, netstat, route and others.
 %patch62 -p1 -b .iface-crash
 #%patch63 -p1
 %patch64 -p1
+%patch65 -p1
+%patch66 -p1
+%patch67 -p1
+%patch68 -p1
+%patch69 -p1
+%patch70 -p1
+%patch71 -p1
+%patch72 -p1
+%patch73 -p1
+%patch74 -p1
+%patch75 -p1
+%patch76 -p1
+%patch77 -p1
+%patch78 -p1
+%patch79 -p1
+%patch80 -p1
+%patch81 -p1
+%patch82 -p1
+%patch83 -p1
 
 cp %SOURCE2 ./config.h
 cp %SOURCE3 ./config.make
@@ -158,7 +196,7 @@ cp %SOURCE5 ./man/en_US/ether-wake.8
 cp %SOURCE6 ./mii-diag.c
 cp %SOURCE7 ./man/en_US/mii-diag.8
 
-%patch65 -p1 -b .format_not_a_string_literal_and_no_format_arguments
+%patch100 -p1 -b .format_not_a_string_literal_and_no_format_arguments
 
 %ifarch alpha
 perl -pi -e "s|-O2||" Makefile
