@@ -238,12 +238,12 @@ iconv -f iso-8859-1 -t utf-8 -o route.tmp man/de_DE/route.8 && mv route.tmp man/
 iconv -f iso-8859-1 -t utf-8 -o slattach.tmp man/de_DE/slattach.8 && mv slattach.tmp man/de_DE/slattach.8
 
 %install
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 mv man/de_DE man/de
 mv man/fr_FR man/fr
 mv man/pt_BR man/pt
 
-make BASEDIR=$RPM_BUILD_ROOT mandir=%{_mandir} install
+make BASEDIR=%{buildroot} mandir=%{_mandir} install
 
 install -m 755 ether-wake %{buildroot}/sbin
 install -m 755 mii-diag %{buildroot}/sbin
@@ -265,7 +265,7 @@ if [ -x /sbin/apparmor_parser ]; then
 fi
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
 %files -f %{name}.lang
 %defattr(-,root,root)
