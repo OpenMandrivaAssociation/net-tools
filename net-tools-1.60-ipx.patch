@@ -1,7 +1,7 @@
-diff -urN net-tools-1.60/lib/ipx_gr.c net-tools-1.60.new/lib/ipx_gr.c
---- net-tools-1.60/lib/ipx_gr.c	2000-10-28 12:59:42.000000000 +0200
-+++ net-tools-1.60.new/lib/ipx_gr.c	2003-05-20 10:54:37.000000000 +0200
-@@ -64,7 +64,7 @@
+diff -up net-tools-1.60/lib/ipx_gr.c.ipx net-tools-1.60/lib/ipx_gr.c
+--- net-tools-1.60/lib/ipx_gr.c.ipx	2011-11-21 02:31:57.000000000 +0100
++++ net-tools-1.60/lib/ipx_gr.c	2011-12-01 17:02:53.261805292 +0100
+@@ -70,7 +70,7 @@ int IPX_rprint(int options)
  	    continue;
  
  	/* Fetch and resolve the Destination */
@@ -10,27 +10,22 @@ diff -urN net-tools-1.60/lib/ipx_gr.c net-tools-1.60.new/lib/ipx_gr.c
  	strcpy(net, ap->sprint(&sa, numeric));
  
  	/* Fetch and resolve the Router Net */
-diff -urN net-tools-1.60/netstat.c net-tools-1.60.new/netstat.c
---- net-tools-1.60/netstat.c	2003-05-20 11:00:57.000000000 +0200
-+++ net-tools-1.60.new/netstat.c	2003-05-20 10:58:25.000000000 +0200
-@@ -1412,13 +1412,13 @@
+diff -up net-tools-1.60/netstat.c.ipx net-tools-1.60/netstat.c
+--- net-tools-1.60/netstat.c.ipx	2011-12-01 17:02:53.000000000 +0100
++++ net-tools-1.60/netstat.c	2011-12-01 17:06:26.071144809 +0100
+@@ -1582,13 +1582,13 @@ static int ipx_info(void)
  	}
  
  	/* Fetch and resolve the Source */
 -	(void) ap->input(4, sad, &sa);
 +	(void) ap->input(0, sad, &sa);
- 	safe_strncpy(buf, ap->sprint(&sa, flag_not), sizeof(buf));
+ 	safe_strncpy(buf, ap->sprint(&sa, flag_not & FLAG_NUM_HOST), sizeof(buf));
  	snprintf(sad, sizeof(sad), "%s:%04X", buf, sport);
  
  	if (!nc) {
  	    /* Fetch and resolve the Destination */
 -	    (void) ap->input(4, dad, &sa);
 +	    (void) ap->input(0, dad, &sa);
- 	    safe_strncpy(buf, ap->sprint(&sa, flag_not), sizeof(buf));
+ 	    safe_strncpy(buf, ap->sprint(&sa, flag_not & FLAG_NUM_HOST), sizeof(buf));
  	    snprintf(dad, sizeof(dad), "%s:%04X", buf, dport);
  	} else
-diff -urN net-tools-1.60/version.h net-tools-1.60.new/version.h
---- net-tools-1.60/version.h	1970-01-01 01:00:00.000000000 +0100
-+++ net-tools-1.60.new/version.h	2003-05-19 16:07:49.000000000 +0200
-@@ -0,0 +1 @@
-+#define RELEASE "net-tools 1.60"

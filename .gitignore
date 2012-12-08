@@ -1,8 +1,0 @@
-bin.netstat.apparmor
-ether-wake.8
-ether-wake.c
-mii-diag.8
-mii-diag.c
-net-tools-1.60-config.h
-net-tools-1.60-config.make
-net-tools-1.60.tar.bz2

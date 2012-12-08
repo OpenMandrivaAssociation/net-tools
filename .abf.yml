@@ -1,9 +1,0 @@
-sources:
-  "bin.netstat.apparmor:"	6247e00e91e30cfefffd4159b6821e8f3c400d77
-  "ether-wake.8:"	f4ea98784167564a8b836c5eb34498c8232176fa
-  "ether-wake.c:"	85e87893722e6be3cc3b4980fd219d5e2621e895
-  "mii-diag.8:"	aad57581378fa51a6dfc0b78bdd3478daacb38bd
-  "mii-diag.c:"	b1299d8fafd91af0ae6b9357b847466257a8f2a4
-  "net-tools-1.60-config.h:"	cddecc7fa3434e63388a7b8d93f0a91aaa07efae
-  "net-tools-1.60-config.make:"	68c4692546ca504a43288b212d24254978432a07
-  "net-tools-1.60.tar.bz2:"	944fb70641505d5d1139dba3aeb81ba124574b83

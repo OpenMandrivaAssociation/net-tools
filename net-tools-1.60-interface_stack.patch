@@ -1,13 +1,24 @@
-Bugzilla Bug 176714 – *** stack smashing detected ***: /sbin/ifconfig terminated
-
---- lib/interface.c-old	2005-12-30 11:08:15.000000000 -0800
-+++ lib/interface.c	2005-12-30 11:17:02.000000000 -0800
-@@ -201,10 +201,11 @@
+diff -up net-tools-1.60/include/interface.h.stack net-tools-1.60/include/interface.h
+--- net-tools-1.60/include/interface.h.stack	2012-01-05 12:22:43.000000000 +0100
++++ net-tools-1.60/include/interface.h	2012-01-05 13:00:10.564699085 +0100
+@@ -73,7 +73,7 @@ extern int do_if_print(struct interface
+ 
+ extern int    procnetdev_version(char *buf);
+ extern int    get_dev_fields(char *bp, struct interface *ife);
+-extern char * get_name(char *name, char *p);
++extern char * get_name(char **namep, char *p);
+ 
+ extern void ife_print(struct interface *ptr);
+ 
+diff -up net-tools-1.60/lib/interface.c.stack net-tools-1.60/lib/interface.c
+--- net-tools-1.60/lib/interface.c.stack	2012-01-05 13:00:10.561699123 +0100
++++ net-tools-1.60/lib/interface.c	2012-01-05 13:03:19.522336790 +0100
+@@ -214,10 +214,11 @@ out:
      return err;
  }
  
--static char *get_name(char *name, char *p)
-+static char *get_name(char **namep, char *p)
+-char *get_name(char *name, char *p)
++char *get_name(char **namep, char *p)
  {
      while (isspace(*p))
  	p++;
@@ -15,9 +26,9 @@ Bugzilla Bug 176714 – *** stack smashing detected ***: /sbin/ifconfig terminat
      while (*p) {
  	if (isspace(*p))
  	    break;
-@@ -305,9 +306,10 @@
+@@ -320,20 +321,22 @@ int get_dev_fields(char *bp, struct inte
+ static int if_readlist_proc(char *target)
  {
-     static int proc_read; 
      FILE *fh;
 -    char buf[512];
      struct interface *ife;
@@ -25,23 +36,26 @@ Bugzilla Bug 176714 – *** stack smashing detected ***: /sbin/ifconfig terminat
 +    char *line = NULL;
 +    size_t linelen = 0;
  
-     if (proc_read) 
- 	    return 0; 
-@@ -320,8 +322,11 @@
+     fh = fopen(_PATH_PROCNET_DEV, "r");
+     if (!fh) {
+ 		fprintf(stderr, _("Warning: cannot open %s (%s). Limited output.\n"),
  			_PATH_PROCNET_DEV, strerror(errno)); 
- 		return if_readconf();
- 	}	
--    fgets(buf, sizeof buf, fh);	/* eat line */
--    fgets(buf, sizeof buf, fh);
+ 		return -2;
+-	}	
+-    if (fgets(buf, sizeof buf, fh))
+-		/* eat line */;
+-    if (fgets(buf, sizeof buf, fh))
+-		/* eat line */;
++	}
 +    if (getline(&line, &linelen, fh) == -1 /* eat line */
-+	|| getline(&line, &linelen, fh) == -1) {
++	|| getline(&line, &linelen, fh) == -1) { /* eat line */
 +		err = -1;
 +		goto out;
-+    }
++	}
  
  #if 0				/* pretty, but can't cope with missing fields */
      fmt = proc_gen_fmt(_PATH_PROCNET_DEV, 1, fh,
-@@ -346,13 +351,13 @@
+@@ -358,13 +361,13 @@ static int if_readlist_proc(char *target
      if (!fmt)
  	return -1;
  #else
@@ -56,10 +70,10 @@ Bugzilla Bug 176714 – *** stack smashing detected ***: /sbin/ifconfig terminat
 +    while (getline(&line, &linelen, fh) != -1) {
 +	char *s, *name;
 +	s = get_name(&name, line);    
- 	ife = add_interface(name);
+ 	ife = if_cache_add(name);
  	get_dev_fields(s, ife);
  	ife->statistics_valid = 1;
-@@ -368,6 +373,8 @@
+@@ -379,6 +382,8 @@ static int if_readlist_proc(char *target
  #if 0
      free(fmt);
  #endif
@@ -68,7 +82,7 @@ Bugzilla Bug 176714 – *** stack smashing detected ***: /sbin/ifconfig terminat
      fclose(fh);
      return err;
  }
-@@ -376,8 +383,9 @@
+@@ -386,24 +391,28 @@ static int if_readlist_proc(char *target
  static int if_readlist_rep(char *target, struct interface *ife)
  {
      FILE *fh;
@@ -79,17 +93,18 @@ Bugzilla Bug 176714 – *** stack smashing detected ***: /sbin/ifconfig terminat
  
      fh = fopen(_PATH_PROCNET_DEV, "r");
      if (!fh) {
-@@ -385,15 +393,18 @@
+ 		fprintf(stderr, _("Warning: cannot open %s (%s). Limited output.\n"),
  			_PATH_PROCNET_DEV, strerror(errno)); 
  		return if_readconf();
- 	}	
+-	}	
 -    fgets(buf, sizeof buf, fh);	/* eat line */
 -    fgets(buf, sizeof buf, fh);
++	}
 +    if (getline(&line, &linelen, fh) == -1 /* eat line */
-+	|| getline(&line, &linelen, fh) == -1) {
++	|| getline(&line, &linelen, fh) == -1) { /* eat line */
 +		err = -1;
 +		goto out;
-+    }
++	}
  
 -    procnetdev_vsn = procnetdev_version(buf);
 +    procnetdev_vsn = procnetdev_version(line);
@@ -104,7 +119,7 @@ Bugzilla Bug 176714 – *** stack smashing detected ***: /sbin/ifconfig terminat
  	get_dev_fields(s, ife);
  	if (target && !strcmp(target,name))
  	{
-@@ -406,6 +417,8 @@
+@@ -416,6 +425,8 @@ static int if_readlist_rep(char *target,
  	err = -1;
      }
  

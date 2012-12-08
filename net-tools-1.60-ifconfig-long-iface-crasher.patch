@@ -1,29 +1,30 @@
---- lib/interface.c	2008-12-22 12:02:43.000000000 +0100
-+++ lib/interface.c.oden	2008-12-22 12:02:51.000000000 +0100
-@@ -203,6 +203,7 @@ out:
+diff -up net-tools-1.60/lib/interface.c.long_iface net-tools-1.60/lib/interface.c
+--- net-tools-1.60/lib/interface.c.long_iface	2011-12-05 18:16:38.000000000 +0100
++++ net-tools-1.60/lib/interface.c	2011-12-05 19:13:17.343530194 +0100
+@@ -216,6 +216,7 @@ out:
  
- static char *get_name(char **namep, char *p)
+ char *get_name(char **namep, char *p)
  {
-+    int count = 0;	
++    int count = 0;
      while (isspace(*p))
  	p++;
      char *name = *namep = p;
-@@ -212,8 +213,13 @@ static char *get_name(char **namep, char
+@@ -224,7 +225,13 @@ char *get_name(char **namep, char *p)
+ 	    break;
  	if (*p == ':') {	/* could be an alias */
- 	    char *dot = p, *dotname = name;
- 	    *name++ = *p++;
--	    while (isdigit(*p))
-+	    count++;
-+	    while (isdigit(*p)){
- 		*name++ = *p++;
-+	        count++;
-+	 	if (count == (IFNAMSIZ-1))
-+	    	      break;
-+	    }
- 	    if (*p != ':') {	/* it wasn't, backup */
- 		p = dot;
- 		name = dotname;
-@@ -224,6 +230,9 @@ static char *get_name(char **namep, char
+ 		char *dot = p++;
+- 		while (*p && isdigit(*p)) p++;
++		count++;
++		while (*p && isdigit(*p)) {
++		    p++;
++		    count++;
++		    if (count == (IFNAMSIZ-1))
++			break;
++		}
+ 		if (*p == ':') {
+ 			/* Yes it is, backup and copy it. */
+ 			p = dot;
+@@ -240,6 +247,9 @@ char *get_name(char **namep, char *p)
  	    break;
  	}
  	*name++ = *p++;
