@@ -80,10 +80,10 @@ cp %{SOURCE9} ./man/en_US/ipmaddr.8
 export CFLAGS="%{optflags} $CFLAGS"
 export LDFLAGS="%{ldflags} $LDFLAGS"
 
-make
+make CC=%{__cc}
 
-gcc %{optflags} %{ldflags} -o ether-wake ether-wake.c
-gcc %{optflags} %{ldflags} -o mii-diag mii-diag.c
+%{__cc} %{optflags} %{ldflags} -o ether-wake ether-wake.c
+%{__cc} %{optflags} %{ldflags} -o mii-diag mii-diag.c
 
 %install
 mv man/de_DE man/de
