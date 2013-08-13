@@ -4,7 +4,7 @@ Summary:	The basic tools for setting up networking
 Name:		net-tools
 Version:	1.60
 # Don't increase 37 here
-Release:	37.%{git}.1
+Release:	38.%{git}.1
 License:	GPLv2
 Group:		System/Configuration/Networking
 Url:		http://net-tools.sourceforge.net
@@ -63,9 +63,7 @@ cp %{SOURCE8} ./man/en_US/iptunnel.8
 cp %{SOURCE9} ./man/en_US/ipmaddr.8
 
 %build
-export CFLAGS="%{optflags} $CFLAGS"
-export LDFLAGS="%{ldflags} $LDFLAGS"
-
+%setup_compile_flags
 make CC=%{__cc}
 
 %{__cc} %{optflags} %{ldflags} -o ether-wake ether-wake.c
