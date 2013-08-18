@@ -4,7 +4,7 @@ Summary:	The basic tools for setting up networking
 Name:		net-tools
 Version:	1.60
 # Don't increase 37 here
-Release:	38.%{git}.1
+Release:	38.%{git}.2
 License:	GPLv2
 Group:		System/Configuration/Networking
 Url:		http://net-tools.sourceforge.net
@@ -44,6 +44,8 @@ Patch11:	net-tools-1.60-netstat-probe.patch
 # kernel 3.6 removes linux/if_strip.h
 Patch12:	net-tools-1.60-STRIP.patch
 BuildRequires:	gettext
+BuildRequires: systemd-units
+Requires(post): systemd-units
 
 %description
 The net-tools package contains the basic tools needed for setting up
