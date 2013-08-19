@@ -4,7 +4,7 @@ Summary:	The basic tools for setting up networking
 Name:		net-tools
 Version:	1.60
 # Don't increase 37 here
-Release:	38.%{git}.2
+Release:	38.%{git}.3
 License:	GPLv2
 Group:		System/Configuration/Networking
 Url:		http://net-tools.sourceforge.net
