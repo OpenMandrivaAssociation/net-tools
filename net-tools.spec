@@ -4,7 +4,7 @@ Summary:	The basic tools for setting up networking
 Name:		net-tools
 Version:	1.60
 # Don't increase 37 here
-Release:	38.%{git}.3
+Release:	38.%{git}.4
 License:	GPLv2
 Group:		System/Configuration/Networking
 Url:		http://net-tools.sourceforge.net
@@ -45,7 +45,6 @@ Patch11:	net-tools-1.60-netstat-probe.patch
 Patch12:	net-tools-1.60-STRIP.patch
 BuildRequires:	gettext
 BuildRequires: systemd-units
-Requires(post): systemd-units
 
 %description
 The net-tools package contains the basic tools needed for setting up
@@ -103,8 +102,6 @@ install -m 644 %{SOURCE10} %{buildroot}%{_unitdir}
 
 %find_lang %{name} --all-name --with-man
 
-%post
-%systemd_post arp-ethers.service
 
 %files -f %{name}.lang
 %doc COPYING
