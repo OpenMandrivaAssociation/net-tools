@@ -246,6 +246,7 @@ main(int argc, char **argv)
 		u16 *data = (u16 *)(&ifr.ifr_data);
 
 		strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
+		ifr.ifr_name[IFNAMSIZ-1] = '\0';
 		data[0] = 0;
 
 		if (ioctl(skfd, 0x8947, &ifr) >= 0) {
