@@ -71,8 +71,7 @@ touch ./config.h
 %build
 %setup_compile_flags
 make CC=%{__cc}
-
-%{__cc} %{optflags} %{ldflags} -o ether-wake ether-wake.c
+make CC=%{__cc} ether-wake
 %{__cc} %{optflags} %{ldflags} -o mii-diag mii-diag.c
 
 %install
