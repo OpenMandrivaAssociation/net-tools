@@ -96,11 +96,11 @@ rm %{buildroot}%{_mandir}/fr/man8/rarp.8*
 rm %{buildroot}%{_mandir}/pt/man8/rarp.8*
 
 # remove hostname (has its own package)
-rm %{buildroot}%{_bindir}/dnsdomainname
-rm %{buildroot}%{_bindir}/domainname
-rm %{buildroot}%{_bindir}/hostname
-rm %{buildroot}%{_bindir}/nisdomainname
-rm %{buildroot}%{_bindir}/ypdomainname
+rm %{buildroot}/bin/dnsdomainname
+rm %{buildroot}/bin/domainname
+rm %{buildroot}/bin/hostname
+rm %{buildroot}/bin/nisdomainname
+rm %{buildroot}/bin/ypdomainname
 rm -rf %{buildroot}%{_mandir}/de/man1
 rm -rf %{buildroot}%{_mandir}/fr/man1
 rm -rf %{buildroot}%{_mandir}/man1
