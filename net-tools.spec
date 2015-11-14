@@ -79,7 +79,7 @@ mv man/de_DE man/de
 mv man/fr_FR man/fr
 mv man/pt_BR man/pt
 
-make BASEDIR=%{buildroot} BINDIR=%{_bindir} SBINDIR=%{_sbindir} install
+make BASEDIR=%{buildroot} BINDIR="/bin" SBINDIR="/sbin" install
 
 # ifconfig and route are installed into /bin by default
 # mv them back to /sbin for now as I (jpopelka) don't think customers would be happy
