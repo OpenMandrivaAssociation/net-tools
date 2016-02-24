@@ -46,14 +46,6 @@ networking:  ifconfig, netstat, route and others.
 
 %prep
 %setup -q -c
-#apply_patches
-%patch1 -p1 -b .cycle
-%patch2 -p1 -b .man
-%patch3 -p1 -b .interface
-%patch4 -p1 -b .dup-tcp
-%patch5 -p1 -b .statalias
-%patch6 -p1 -b .stack
-%patch7 -p1 -b .long_iface
 
 cp %{SOURCE1} ./config.h
 cp %{SOURCE2} ./config.make
@@ -64,7 +56,7 @@ cp %{SOURCE6} ./man/en_US
 cp %{SOURCE7} ./man/en_US
 cp %{SOURCE8} ./man/en_US
 
-%patch20 -p1 -b .interfaces
+%apply_patches
 
 touch ./config.h
 
