@@ -80,26 +80,22 @@ rm %{buildroot}%{_mandir}/de/man8/rarp.8*
 rm %{buildroot}%{_mandir}/fr/man8/rarp.8*
 rm %{buildroot}%{_mandir}/pt/man8/rarp.8*
 
-# remove hostname (has its own package)
-rm %{buildroot}/bin/dnsdomainname
-rm %{buildroot}/bin/domainname
-rm %{buildroot}/bin/hostname
-rm %{buildroot}/bin/nisdomainname
-rm %{buildroot}/bin/ypdomainname
+# otherwise %%find_lang finds them even they're empty
 rm -rf %{buildroot}%{_mandir}/de/man1
 rm -rf %{buildroot}%{_mandir}/fr/man1
 rm -rf %{buildroot}%{_mandir}/man1
 rm -rf %{buildroot}%{_mandir}/pt/man1
+rm -rf %{buildroot}%{_mandir}/pt/man5
 
 # install systemd unit file
-mkdir -p %{buildroot}%{_unitdir}
-install -m 644 %{SOURCE9} %{buildroot}%{_unitdir}
+mkdir -p %{buildroot}%{_systemunitdir}
+install -m 644 %{SOURCE9} %{buildroot}%{_systemunitdir}
 
 %find_lang %{name} --all-name --with-man
 
 %files -f %{name}.lang
 %doc COPYING
-%config(noreplace) %{_unitdir}/arp-ethers.service
+%{_systemunitdir}/arp-ethers.service
 /bin/*
 /sbin/*
 %{_mandir}/man[58]/*
