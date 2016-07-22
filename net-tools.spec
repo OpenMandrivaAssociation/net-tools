@@ -1,12 +1,13 @@
-%define date 20150915
+%define date 20160722
 
 Summary:	The basic tools for setting up networking
 Name:		net-tools
 Version:	2.0
-Release:	1.%{date}.1
+Release:	1.%{date}.2
 License:	GPLv2
 Group:		System/Configuration/Networking
 Url:		http://net-tools.sourceforge.net
+# (tpg) https://github.com/ecki/net-tools
 #git archive --format=tar --remote=git://git.code.sf.net/p/net-tools/code master | xz > net-tools-2.0-$(date +%Y%m%d).tar.xz
 Source0:	net-tools-%{version}-%{date}.tar.xz
 Source1:	net-tools-config.h
@@ -20,32 +21,23 @@ Source8:	ipmaddr.8
 Source9:	arp-ethers.service
 
 # adds <delay> option that allows netstat to cycle printing through statistics every delay seconds.
-Patch1:		net-tools-cycle.patch
+Patch0:		net-tools-cycle.patch
 # various man page fixes merged into one patch
-Patch4:		net-tools-man.patch
-# netstat: interface option now works as described in the man page (#61113, #115987)
-Patch5:		net-tools-interface.patch
-# filter out duplicate tcp entries (#139407)
-Patch6:		net-tools-duplicate-tcp.patch
-# don't report statistics for virtual devices (#143981)
-Patch7:		net-tools-statalias.patch
-# clear static buffers in interface.c by Ulrich Drepper (#176714)
-Patch8:		net-tools-interface_stack.patch
-# ifconfig crash when interface name is too long (#190703)
-Patch10:	net-tools-ifconfig-long-iface-crasher.patch
+Patch1:		net-tools-man.patch
 # use all interfaces instead of default (#1003875)
-Patch20:	ether-wake-interfaces.patch
+Patch2:		ether-wake-interfaces.patch
 
 BuildRequires:	gettext
 BuildRequires:	systemd
 BuildRequires:	pkgconfig(bluez)
+BuildRequires:	kernel-release-headers
 
 %description
 The net-tools package contains the basic tools needed for setting up
 networking:  ifconfig, netstat, route and others.
 
 %prep
-%setup -q -c
+%setup -qn %{name}-%{version}-%{date}
 
 cp %{SOURCE1} ./config.h
 cp %{SOURCE2} ./config.make
@@ -61,9 +53,10 @@ cp %{SOURCE8} ./man/en_US
 touch ./config.h
 
 %build
+%serverbuild_hardened
 %setup_compile_flags
-make CC=%{__cc}
-make CC=%{__cc} ether-wake
+%make CC=%{__cc}
+%make CC=%{__cc} ether-wake
 %{__cc} %{optflags} %{ldflags} -o mii-diag mii-diag.c
 
 %install

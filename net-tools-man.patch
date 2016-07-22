@@ -108,19 +108,6 @@ diff -up net-tools-2.0/man/en_US/nameif.8.man net-tools-2.0/man/en_US/nameif.8
 +
  .SH BUGS
  Only works for Ethernet currently.
-diff -up net-tools-2.0/man/en_US/netstat.8.man net-tools-2.0/man/en_US/netstat.8
---- net-tools-2.0/man/en_US/netstat.8.man	2014-07-07 14:51:31.370459575 +0200
-+++ net-tools-2.0/man/en_US/netstat.8	2014-07-07 14:51:31.380459405 +0200
-@@ -198,7 +198,8 @@ Show the PID and name of the program to
- .SS "\-l, \-\-listening"
- Show only listening sockets.  (These are omitted by default.)
- .SS "\-a, \-\-all"
--Show both listening and non-listening sockets.  With the
-+Show both listening and non-listening (for TCP this means established
-+connections) sockets.  With the
- .B \-\-interfaces
- option, show interfaces that are not up
- .SS "\-F"
 diff -up net-tools-2.0/man/en_US/route.8.man net-tools-2.0/man/en_US/route.8
 --- net-tools-2.0/man/en_US/route.8.man	2014-04-26 02:45:16.000000000 +0200
 +++ net-tools-2.0/man/en_US/route.8	2014-07-07 14:52:58.766977905 +0200

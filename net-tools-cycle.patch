@@ -1,6 +1,6 @@
 diff -up net-tools-2.0/lib/interface.c.cycle net-tools-2.0/lib/interface.c
---- net-tools-2.0/lib/interface.c.cycle	2015-08-29 08:59:31.000000000 +0200
-+++ net-tools-2.0/lib/interface.c	2015-09-15 18:09:54.089697132 +0200
+--- net-tools-2.0/lib/interface.c.cycle	2016-02-15 16:54:18.000000000 +0100
++++ net-tools-2.0/lib/interface.c	2016-03-30 09:58:18.247891588 +0200
 @@ -93,6 +93,7 @@ int if_list_all = 0;	/* do we have reque
  static struct interface *int_list, *int_last;
  
@@ -25,51 +25,145 @@ diff -up net-tools-2.0/lib/interface.c.cycle net-tools-2.0/lib/interface.c
  	if (err)
  	    return err;
      }
-@@ -379,6 +383,41 @@ static int if_readlist_proc(const char *
-     fclose(fh);
+@@ -210,16 +214,24 @@ out:
      return err;
  }
+ 
+-static const char *get_name(char *name, const char *p)
++static const char *get_name(char **namep, const char *p)
+ {
++    int count = 0;
+     while (isspace(*p))
+ 	p++;
++    char *name = *namep = p;
+     while (*p) {
+ 	if (isspace(*p))
+ 	    break;
+ 	if (*p == ':') {	/* could be an alias */
+ 		const char *dot = p++;
+- 		while (*p && isdigit(*p)) p++;
++		count++;
++		while (*p && isdigit(*p)) {
++		    p++;
++		    count++;
++		    if (count == (IFNAMSIZ-1))
++			break;
++		}
+ 		if (*p == ':') {
+ 			/* Yes it is, backup and copy it. */
+ 			p = dot;
+@@ -235,6 +247,9 @@ static const char *get_name(char *name,
+ 	    break;
+ 	}
+ 	*name++ = *p++;
++	count++;
++	if (count == (IFNAMSIZ-1))
++    	      break;
+     }
+     *name++ = '\0';
+     return p;
+@@ -316,9 +331,10 @@ static int get_dev_fields(const char *bp
+ static int if_readlist_proc(const char *target)
+ {
+     FILE *fh;
+-    char buf[512];
+     struct interface *ife;
+     int err;
++    char *line = NULL;
++    size_t linelen = 0;  
+ 
+     fh = fopen(_PATH_PROCNET_DEV, "r");
+     if (!fh) {
+@@ -326,10 +342,11 @@ static int if_readlist_proc(const char *
+ 			_PATH_PROCNET_DEV, strerror(errno));
+ 		return -2;
+ 	}
+-    if (fgets(buf, sizeof buf, fh))
+-		/* eat line */;
+-    if (fgets(buf, sizeof buf, fh))
+-		/* eat line */;
++    if (getline(&line, &linelen, fh) == -1 /* eat line */
++	|| getline(&line, &linelen, fh) == -1) { /* eat line */
++		err = -1;
++		goto out;
++	}
+ 
+ #if 0				/* pretty, but can't cope with missing fields */
+     fmt = proc_gen_fmt(_PATH_PROCNET_DEV, 1, fh,
+@@ -354,14 +371,14 @@ static int if_readlist_proc(const char *
+     if (!fmt)
+ 	return -1;
+ #else
+-    procnetdev_vsn = procnetdev_version(buf);
++    procnetdev_vsn = procnetdev_version(line);
+ #endif
+ 
+     err = 0;
+-    while (fgets(buf, sizeof buf, fh)) {
++    while (getline(&line, &linelen, fh) != -1) {
+ 	const char *s;
+-	char name[IFNAMSIZ];
+-	s = get_name(name, buf);
++	char *name;
++	s = get_name(&name, line);    
+ 	ife = if_cache_add(name);
+ 	get_dev_fields(s, ife);
+ 	ife->statistics_valid = 1;
+@@ -376,6 +393,51 @@ static int if_readlist_proc(const char *
+ #if 0
+     free(fmt);
+ #endif
++  out:
++    free(line);
++    fclose(fh);
++    return err;
++}
 +
 +static int if_readlist_rep(const char *target, struct interface *ife)
 +{
 +    FILE *fh;
-+    char buf[512];
 +    int err;
++    char *line = NULL;
++    size_t linelen = 0;
 +
 +    fh = fopen(_PATH_PROCNET_DEV, "r");
 +    if (!fh) {
 +		fprintf(stderr, _("Warning: cannot open %s (%s). Limited output.\n"),
 +			_PATH_PROCNET_DEV, strerror(errno)); 
 +		return if_readconf();
-+	}	
-+    fgets(buf, sizeof buf, fh);	/* eat line */
-+    fgets(buf, sizeof buf, fh);
++	}
++    if (getline(&line, &linelen, fh) == -1 /* eat line */
++	|| getline(&line, &linelen, fh) == -1) { /* eat line */
++		err = -1;
++		goto out;
++	}
 +
-+    procnetdev_vsn = procnetdev_version(buf);
++    procnetdev_vsn = procnetdev_version(line);
 +
 +    err = 0;
-+    while (fgets(buf, sizeof buf, fh)) {
-+	char *s, name[IFNAMSIZ];
-+	s = get_name(name, buf);    
++    while (getline(&line, &linelen, fh) != -1) {
++	char *s, *name;
++	s = get_name(&name, line);    
 +	get_dev_fields(s, ife);
-+	ife->statistics_valid = 1;
 +	if (target && !strcmp(target,name))
++	{
++		ife->statistics_valid = 1;
 +		break;
++	}
 +    }
 +    if (ferror(fh)) {
 +	perror(_PATH_PROCNET_DEV);
 +	err = -1;
 +    }
 +
-+    fclose(fh);
-+    return err;
-+}
- 
- int if_readlist(void)
- {
++  out:
++    free(line);
+     fclose(fh);
+     return err;
+ }
 diff -up net-tools-2.0/man/en_US/netstat.8.cycle net-tools-2.0/man/en_US/netstat.8
---- net-tools-2.0/man/en_US/netstat.8.cycle	2015-08-29 08:59:31.000000000 +0200
-+++ net-tools-2.0/man/en_US/netstat.8	2015-09-15 18:09:54.090697129 +0200
+--- net-tools-2.0/man/en_US/netstat.8.cycle	2016-02-15 16:54:18.000000000 +0100
++++ net-tools-2.0/man/en_US/netstat.8	2016-03-30 09:58:18.241891637 +0200
 @@ -36,6 +36,7 @@ netstat \- Print network connections, ro
  .RB [ \-\-verbose | \-v ]
  .RB [ \-\-continuous | \-c]
@@ -78,15 +172,20 @@ diff -up net-tools-2.0/man/en_US/netstat.8.cycle net-tools-2.0/man/en_US/netstat
  .P
  .B netstat 
  .RB { \-\-route | \-r }
-@@ -45,6 +46,7 @@ netstat \- Print network connections, ro
+@@ -45,22 +46,25 @@ netstat \- Print network connections, ro
  .RB [ \-\-numeric | \-n ]
  .RB [ \-\-numeric\-hosts "] [" \-\-numeric\-ports "] [" \-\-numeric\-users ]
  .RB [ \-\-continuous | \-c ]
 +.RB [delay]
  .P
  .B netstat
- .RB { \-\-interfaces | \-i }
-@@ -55,12 +57,14 @@ netstat \- Print network connections, ro
+-.RB { \-\-interfaces | \-i }
++.RB { \-\-interfaces | \-I | \-i }
+ .RB [ \-\-all | \-a ]
+-.RB [ \-\-extend | \-e  [ \-\-extend | \-e] ]
++.RB [ \-\-extend | \-e  ]
+ .RB [ \-\-verbose | \-v ]
+ .RB [ \-\-program | \-p ]
  .RB [ \-\-numeric | \-n ]
  .RB [ \-\-numeric-hosts "] [" \-\-numeric-ports "] [" \-\-numeric-users ]
  .RB [ \-\-continuous | \-c ]
@@ -117,7 +216,27 @@ diff -up net-tools-2.0/man/en_US/netstat.8.cycle net-tools-2.0/man/en_US/netstat
  .P
  .B netstat 
  .RB { \-\-version | \-V }
-@@ -208,6 +214,10 @@ option, show interfaces that are not up
+@@ -128,8 +134,8 @@ and
+ produce the same output.
+ .SS "\-\-groups, \-g"
+ Display multicast group membership information for IPv4 and IPv6.
+-.SS "\-\-interfaces, \-i"
+-Display a table of all network interfaces.
++.SS "\-\-interfaces=\fIiface \fR, \fB\-I=\fIiface \fR, \fB\-i"
++Display a table of all network interfaces, or the specified \fIiface\fR.
+ .SS "\-\-masquerade, \-M"
+ Display a list of masqueraded connections.
+ .SS "\-\-statistics, \-s"
+@@ -201,13 +207,18 @@ Show the PID and name of the program to
+ .SS "\-l, \-\-listening"
+ Show only listening sockets.  (These are omitted by default.)
+ .SS "\-a, \-\-all"
+-Show both listening and non-listening sockets.  With the
++Show both listening and non-listening (for TCP this means established
++connections) sockets.  With the
+ .B \-\-interfaces
+ option, show interfaces that are not up
+ .SS "\-F"
  Print routing information from the FIB.  (This is the default.)
  .SS "\-C"
  Print routing information from the route cache.
@@ -129,8 +248,8 @@ diff -up net-tools-2.0/man/en_US/netstat.8.cycle net-tools-2.0/man/en_US/netstat
  .SH OUTPUT
  .P
 diff -up net-tools-2.0/netstat.c.cycle net-tools-2.0/netstat.c
---- net-tools-2.0/netstat.c.cycle	2015-08-29 08:59:31.000000000 +0200
-+++ net-tools-2.0/netstat.c	2015-09-15 18:09:54.090697129 +0200
+--- net-tools-2.0/netstat.c.cycle	2016-02-15 16:54:18.000000000 +0100
++++ net-tools-2.0/netstat.c	2016-03-30 10:04:07.617171984 +0200
 @@ -115,8 +115,8 @@
  #endif
  
@@ -142,7 +261,15 @@ diff -up net-tools-2.0/netstat.c.cycle net-tools-2.0/netstat.c
  
  typedef enum {
      SS_FREE = 0,		/* not allocated                */
-@@ -340,10 +340,10 @@ static void prg_cache_clear(void)
+@@ -142,6 +142,7 @@ static char *Release = RELEASE, *Signatu
+ #define E_IOCTL -3
+ 
+ int flag_int = 0;
++char *flag_int_name = NULL;
+ int flag_rou = 0;
+ int flag_mas = 0;
+ int flag_sta = 0;
+@@ -340,10 +341,10 @@ static void prg_cache_clear(void)
      prg_cache_loaded = 0;
  }
  
@@ -155,16 +282,152 @@ diff -up net-tools-2.0/netstat.c.cycle net-tools-2.0/netstat.c
  }
  
  static int extract_type_1_socket_inode(const char lname[], unsigned long * inode_p) {
-@@ -1892,6 +1892,8 @@ static int rfcomm_info(void)
+@@ -501,6 +502,121 @@ static void prg_cache_load(void)
+ 			 " will not be shown, you would have to be root to see it all.)\n"));
+ }
+ 
++#define TCP_HASH_SIZE 1009
++
++static struct tcp_node {
++  struct tcp_node *next;
++  char            *socket_pair;
++} *tcp_node_hash[TCP_HASH_SIZE];
++
++static unsigned int tcp_node_compute_string_hash(const char *p)
++{
++  unsigned int h = *p;
++
++  if (h)
++    for (p += 1; *p != '\0'; p++)
++      h = (h << 5) - h + *p;
++
++  return h;
++}
++
++#define TCP_NODE_HASH_STRING(x) \
++  (tcp_node_compute_string_hash(x) % TCP_HASH_SIZE)
++
++static void tcp_node_hash_clear(void)
++{
++  int i;
++  struct tcp_node *next_node;
++  struct tcp_node *tmp_node;
++  for (i=0; i < TCP_HASH_SIZE; i++) {
++    if (tcp_node_hash[i]) {
++      /* free the children of this hash bucket */
++      next_node = tcp_node_hash[i]->next;
++      while (next_node) {
++	tmp_node = next_node;
++	next_node = next_node->next;
++	free(tmp_node->socket_pair);
++	free(tmp_node);
++      }
++
++      /* free the bucket itself */
++      free(tcp_node_hash[i]->socket_pair);
++      free(tcp_node_hash[i]);
++      tcp_node_hash[i] = NULL;
++    }
++  }
++}
++
++/* This function takes a socket pair string.  If it already exists in
++   the hash it returns -1, otherwise it returns 0. */
++
++static int tcp_node_hash_check_and_append(const char *local_addr,
++					  int local_port,
++					  const char *rem_addr,
++					  int rem_port)
++{
++  unsigned int hash_val;
++  struct tcp_node *tmp_node;
++  int   tmp_string_len;
++  char *tmp_string;;
++
++  /* Size of the string is the size of the two lengths of the address
++     strings plus enough sizes for the colons and the ports. */
++  tmp_string_len = strlen(local_addr) + strlen(rem_addr) + 32;
++  tmp_string = malloc(tmp_string_len);
++  if (!tmp_string)
++    return 0;
++
++  if (snprintf(tmp_string, tmp_string_len - 1, "%s:%d:%s:%d",
++	       local_addr, local_port, rem_addr, rem_port) < 0) {
++    free(tmp_string);
++    return 0;
++  }
++
++  hash_val = TCP_NODE_HASH_STRING(tmp_string);
++
++  /* See if we have to allocate this node */
++  if (!tcp_node_hash[hash_val]) {
++    tcp_node_hash[hash_val] = malloc(sizeof(struct tcp_node));
++    if (!tcp_node_hash[hash_val]) {
++      free(tmp_string);
++      return 0;
++    }
++
++    memset(tcp_node_hash[hash_val], 0, sizeof(struct tcp_node));
++
++    /* Stuff this new value into the hash bucket and return early */
++    tcp_node_hash[hash_val]->socket_pair = tmp_string;
++    return 0;
++  }
++
++  /* Try to find the value in the hash bucket. */
++  tmp_node = tcp_node_hash[hash_val];
++  while (tmp_node) {
++    if (!strcmp(tmp_node->socket_pair, tmp_string)) {
++      free(tmp_string);
++      return -1;
++    }
++    tmp_node = tmp_node->next;
++  }
++
++  /* If we got this far it means that it isn't in the hash bucket.
++     Add it to the front since it's faster that way. */
++  tmp_node = tcp_node_hash[hash_val];
++
++  tcp_node_hash[hash_val] = malloc(sizeof(struct tcp_node));
++  if (!tcp_node_hash[hash_val]) {
++    free(tmp_string);
++    tcp_node_hash[hash_val] = tmp_node;
++    return 0;
++  }
++
++  tcp_node_hash[hash_val]->socket_pair = tmp_string;
++  tcp_node_hash[hash_val]->next = tmp_node;
++
++  return 0;
++}
++
+ #if HAVE_AFNETROM
+ static const char *netrom_state[] =
+ {
+@@ -1109,6 +1225,12 @@ static void tcp_do_one(int lnr, const ch
+ 	return;
+     }
+ 
++    /* make sure that we haven't seen this socket pair before */
++    if (tcp_node_hash_check_and_append(local_addr, local_port, rem_addr, rem_port) < 0) {
++    	/*  fprintf(stderr, _("warning, got duplicate tcp line.\n")); */
++    	return;
++    }
++
+ 	addr_do_one(local_addr, sizeof(local_addr), 22, ap, &localsas, local_port, "tcp");
+ 	addr_do_one(rem_addr, sizeof(rem_addr), 22, ap, &remsas, rem_port, "tcp");
+ 
+@@ -1877,6 +1999,9 @@ static int rfcomm_info(void)
  
  static int iface_info(void)
  {
 +    static int count=0;
++    struct interface *ife = NULL;
 +
      if (skfd < 0) {
  	if ((skfd = sockets_open(0)) < 0) {
  	    perror("socket");
-@@ -1901,20 +1903,21 @@ static int iface_info(void)
+@@ -1886,20 +2011,25 @@ static int iface_info(void)
      }
      if (flag_exp < 2) {
  	ife_short = 1;
@@ -173,7 +436,12 @@ diff -up net-tools-2.0/netstat.c.cycle net-tools-2.0/netstat.c
 +	    printf(_("Iface      MTU    RX-OK RX-ERR RX-DRP RX-OVR    TX-OK TX-ERR TX-DRP TX-OVR Flg\n"));
      }
  
-     if (for_all_interfaces(do_if_print, &flag_all) < 0) {
+-    if (for_all_interfaces(do_if_print, &flag_all) < 0) {
++    if (flag_int_name) {
++        ife = lookup_interface(flag_int_name);
++        do_if_print(ife, &flag_all);
++    }
++    else if (for_all_interfaces(do_if_print, &flag_all) < 0) {
  	perror(_("missing interface information"));
  	exit(1);
      }
@@ -189,16 +457,19 @@ diff -up net-tools-2.0/netstat.c.cycle net-tools-2.0/netstat.c
      return 0;
  }
  
-@@ -1930,7 +1933,7 @@ static void usage(void)
+@@ -1915,9 +2045,10 @@ static void usage(int rc)
  {
      fprintf(stderr, _("usage: netstat [-vWeenNcCF] [<Af>] -r         netstat {-V|--version|-h|--help}\n"));
      fprintf(stderr, _("       netstat [-vWnNcaeol] [<Socket> ...]\n"));
 -    fprintf(stderr, _("       netstat { [-vWeenNac] -i | [-cnNe] -M | -s [-6tuw] }\n\n"));
-+    fprintf(stderr, _("       netstat { [-vWeenNac] -i | [-cnNe] -M | -s [-6tuw] } [delay]\n\n"));
++    fprintf(stderr, _("       netstat { [-vWeenNac] -I[<Iface>] | [-veenNac] -i | [-cnNe] -M | -s [-6tuw] } [delay]\n\n"));
  
      fprintf(stderr, _("        -r, --route              display routing table\n"));
++    fprintf(stderr, _("        -I, --interfaces=<Iface> display interface table for <Iface>\n"));
      fprintf(stderr, _("        -i, --interfaces         display interface table\n"));
-@@ -1972,6 +1975,7 @@ int main
+     fprintf(stderr, _("        -g, --groups             display multicast group memberships\n"));
+     fprintf(stderr, _("        -s, --statistics         display networking statistics (like SNMP)\n"));
+@@ -1957,11 +2088,12 @@ int main
   (int argc, char *argv[]) {
      int i;
      int lop;
@@ -206,20 +477,49 @@ diff -up net-tools-2.0/netstat.c.cycle net-tools-2.0/netstat.c
      static struct option longopts[] =
      {
  	AFTRANS_OPTS,
-@@ -2154,6 +2158,12 @@ int main
+ 	{"version", 0, 0, 'V'},
+-	{"interfaces", 0, 0, 'i'},
++	{"interfaces", 2, 0, 'I'},
+ 	{"help", 0, 0, 'h'},
+ 	{"route", 0, 0, 'r'},
+ #if HAVE_FW_MASQUERADE
+@@ -2005,7 +2137,7 @@ int main
+     getroute_init();		/* Set up AF routing support */
+ 
+     afname[0] = '\0';
+-    while ((i = getopt_long(argc, argv, "A:CFMacdeghilnNoprsStuUvVWw2fx64?Z", longopts, &lop)) != EOF)
++    while ((i = getopt_long(argc, argv, "A:CFMacdeghiI::lnNoprsStuUvVWw2fx64?Z", longopts, &lop)) != EOF)
+ 	switch (i) {
+ 	case -1:
+ 	    break;
+@@ -2046,6 +2178,13 @@ int main
+ 	case 'p':
+ 	    flag_prg++;
+ 	    break;
++	case 'I':
++	    if (optarg && strcmp(optarg, "(null)"))
++		if (optarg[0] == '=') optarg++;
++	    if (optarg && strcmp(optarg, "(null)"))
++		flag_int_name = strdup(optarg);
++	    flag_int++;
++	    break;
+ 	case 'i':
+ 	    flag_int++;
+ 	    break;
+@@ -2140,6 +2279,12 @@ int main
  	    flag_sta++;
  	}
  
 +    if(argc == optind + 1) {
-+      if((reptimer = atoi(argv[optind])) <= 0)
-+	usage();
-+      flag_cnt++;
++    	if((reptimer = atoi(argv[optind])) <= 0)
++    		usage(E_USAGE);
++        flag_cnt++;
 +    }
-+    
++
      if (flag_int + flag_rou + flag_mas + flag_sta > 1)
- 	usage();
+ 	usage(E_OPTERR);
  
-@@ -2183,7 +2193,7 @@ int main
+@@ -2169,7 +2314,7 @@ int main
  			     flag_not & FLAG_NUM_PORT, flag_exp);
  	    if (i || !flag_cnt)
  		break;
@@ -228,7 +528,7 @@ diff -up net-tools-2.0/netstat.c.cycle net-tools-2.0/netstat.c
  	}
  #else
  	ENOSUPP("netstat", "FW_MASQUERADE");
-@@ -2196,15 +2206,16 @@ int main
+@@ -2182,15 +2327,16 @@ int main
          if (!afname[0])
              safe_strncpy(afname, DFLT_AF, sizeof(afname));
  
@@ -247,7 +547,7 @@ diff -up net-tools-2.0/netstat.c.cycle net-tools-2.0/netstat.c
  #else
              ENOSUPP("netstat", "AF INET6");
  #endif
-@@ -2212,7 +2223,11 @@ int main
+@@ -2198,7 +2344,11 @@ int main
            printf(_("netstat: No statistics support for specified address family: %s\n"), afname);
            exit(1);
          }
@@ -260,7 +560,7 @@ diff -up net-tools-2.0/netstat.c.cycle net-tools-2.0/netstat.c
      }
  
      if (flag_rou) {
-@@ -2234,7 +2249,7 @@ int main
+@@ -2220,7 +2370,7 @@ int main
  	    i = route_info(afname, options);
  	    if (i || !flag_cnt)
  		break;
@@ -269,7 +569,7 @@ diff -up net-tools-2.0/netstat.c.cycle net-tools-2.0/netstat.c
  	}
  	return (i);
      }
-@@ -2243,7 +2258,7 @@ int main
+@@ -2229,7 +2379,7 @@ int main
  	    i = iface_info();
  	    if (!flag_cnt || i)
  		break;
@@ -278,18 +578,20 @@ diff -up net-tools-2.0/netstat.c.cycle net-tools-2.0/netstat.c
  	}
  	return (i);
      }
-@@ -2430,7 +2445,7 @@ int main
+@@ -2416,8 +2566,9 @@ int main
  
  	if (!flag_cnt || i)
  	    break;
 -        wait_continous();
 +        wait_continous(reptimer);
  	prg_cache_clear();
++	tcp_node_hash_clear();
      }
      return (i);
+ }
 diff -up net-tools-2.0/statistics.c.cycle net-tools-2.0/statistics.c
---- net-tools-2.0/statistics.c.cycle	2015-08-29 08:59:31.000000000 +0200
-+++ net-tools-2.0/statistics.c	2015-09-15 18:10:34.608582779 +0200
+--- net-tools-2.0/statistics.c.cycle	2016-02-15 16:54:18.000000000 +0100
++++ net-tools-2.0/statistics.c	2016-03-30 09:58:18.238891661 +0200
 @@ -527,7 +527,7 @@ static void process_fd2(FILE *f, const c
      }
  }
