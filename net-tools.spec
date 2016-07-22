@@ -30,7 +30,7 @@ Patch2:		ether-wake-interfaces.patch
 BuildRequires:	gettext
 BuildRequires:	systemd
 BuildRequires:	pkgconfig(bluez)
-BuildRequires:	kernel-release-headers
+BuildRequires:	kernel-headers
 
 %description
 The net-tools package contains the basic tools needed for setting up
