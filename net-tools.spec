@@ -3,7 +3,7 @@
 Summary:	The basic tools for setting up networking
 Name:		net-tools
 Version:	2.0
-Release:	1.%{date}.2
+Release:	1.%{date}.3
 License:	GPLv2
 Group:		System/Configuration/Networking
 Url:		http://net-tools.sourceforge.net
@@ -26,9 +26,10 @@ Patch0:		net-tools-cycle.patch
 Patch1:		net-tools-man.patch
 # use all interfaces instead of default (#1003875)
 Patch2:		ether-wake-interfaces.patch
+Patch3:		net-tools-linux48.patch
 
 BuildRequires:	gettext
-BuildRequires:	systemd
+BuildRequires:	pkgconfig(libsystemd)
 BuildRequires:	pkgconfig(bluez)
 BuildRequires:	kernel-headers
 
@@ -55,8 +56,8 @@ touch ./config.h
 %build
 %serverbuild_hardened
 %setup_compile_flags
-%make CC=%{__cc}
-%make CC=%{__cc} ether-wake
+%make_build CC=%{__cc}
+%make_build CC=%{__cc} ether-wake
 %{__cc} %{optflags} %{ldflags} -o mii-diag mii-diag.c
 
 %install
