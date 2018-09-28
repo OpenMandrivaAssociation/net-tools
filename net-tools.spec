@@ -3,7 +3,7 @@
 Summary:	The basic tools for setting up networking
 Name:		net-tools
 Version:	2.0
-Release:	1.%{date}.3
+Release:	1.%{date}.4
 License:	GPLv2
 Group:		System/Configuration/Networking
 Url:		http://net-tools.sourceforge.net
@@ -29,7 +29,7 @@ Patch2:		ether-wake-interfaces.patch
 Patch3:		net-tools-linux48.patch
 
 BuildRequires:	gettext
-BuildRequires:	pkgconfig(libsystemd)
+BuildRequires:	systemd-macros
 BuildRequires:	pkgconfig(bluez)
 BuildRequires:	kernel-headers
 
@@ -89,14 +89,14 @@ rm -rf %{buildroot}%{_mandir}/pt/man1
 rm -rf %{buildroot}%{_mandir}/pt/man5
 
 # install systemd unit file
-mkdir -p %{buildroot}%{_systemunitdir}
-install -m 644 %{SOURCE9} %{buildroot}%{_systemunitdir}
+mkdir -p %{buildroot}%{_unitdir}
+install -m 644 %{SOURCE9} %{buildroot}%{_unitdir}
 
 %find_lang %{name} --all-name --with-man
 
 %files -f %{name}.lang
 %doc COPYING
-%{_systemunitdir}/arp-ethers.service
+%{_unitdir}/arp-ethers.service
 /bin/*
 /sbin/*
 %{_mandir}/man[58]/*
