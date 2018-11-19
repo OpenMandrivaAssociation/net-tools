@@ -1,9 +1,12 @@
 %define date 20160722
+%ifarch %{ix86}
+%define _disable_lto 1
+%endif
 
 Summary:	The basic tools for setting up networking
 Name:		net-tools
 Version:	2.0
-Release:	1.%{date}.4
+Release:	1.%{date}.5
 License:	GPLv2
 Group:		System/Configuration/Networking
 Url:		http://net-tools.sourceforge.net
