@@ -52,7 +52,7 @@ cp %{SOURCE6} ./man/en_US
 cp %{SOURCE7} ./man/en_US
 cp %{SOURCE8} ./man/en_US
 
-%apply_patches
+%autopatch -p1
 
 touch ./config.h
 
