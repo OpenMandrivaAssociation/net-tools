@@ -1,4 +1,4 @@
-%define date 20160722
+%define date 20160912
 %ifarch %{ix86}
 %define _disable_lto 1
 %endif
@@ -12,7 +12,7 @@ Group:		System/Configuration/Networking
 Url:		http://net-tools.sourceforge.net
 # (tpg) https://github.com/ecki/net-tools
 #git archive --format=tar --remote=git://git.code.sf.net/p/net-tools/code master | xz > net-tools-2.0-$(date +%Y%m%d).tar.xz
-Source0:	net-tools-%{version}-%{date}.tar.xz
+Source0:	net-tools-%{version}.%{date}.tar.xz
 Source1:	net-tools-config.h
 Source2:	net-tools-config.make
 Source3:	ether-wake.c
@@ -24,24 +24,30 @@ Source8:	ipmaddr.8
 Source9:	arp-ethers.service
 
 # adds <delay> option that allows netstat to cycle printing through statistics every delay seconds.
-Patch0:		net-tools-cycle.patch
+Patch1: net-tools-cycle.patch
 # various man page fixes merged into one patch
-Patch1:		net-tools-man.patch
+Patch2: net-tools-man.patch
+# linux-4.8
+Patch3: net-tools-linux48.patch
 # use all interfaces instead of default (#1003875)
-Patch2:		ether-wake-interfaces.patch
-Patch3:		net-tools-linux48.patch
+Patch20: ether-wake-interfaces.patch
+# use all interfaces instead of default (#1003875)
+Patch21: net-tools-ifconfig-EiB.patch
+Patch22: net-tools-timer-man.patch
+Patch23: net-tools-interface-name-len.patch
+Patch24: net-tools-covscan.patch
 
 BuildRequires:	gettext
-BuildRequires:	systemd-macros
 BuildRequires:	pkgconfig(bluez)
 BuildRequires:	kernel-headers
+BuildRequires:	pkgconfig(libselinux)
 
 %description
 The net-tools package contains the basic tools needed for setting up
 networking:  ifconfig, netstat, route and others.
 
 %prep
-%setup -qn %{name}-%{version}-%{date}
+%setup -q -c %{name}-%{version}-%{date}
 
 cp %{SOURCE1} ./config.h
 cp %{SOURCE2} ./config.make
@@ -61,7 +67,7 @@ touch ./config.h
 %setup_compile_flags
 %make_build CC=%{__cc}
 %make_build CC=%{__cc} ether-wake
-%{__cc} %{optflags} %{ldflags} -o mii-diag mii-diag.c
+%{__cc} %{optflags} -pie %{ldflags} -fPIE -o mii-diag mii-diag.c
 
 %install
 mv man/de_DE man/de
@@ -96,6 +102,15 @@ mkdir -p %{buildroot}%{_unitdir}
 install -m 644 %{SOURCE9} %{buildroot}%{_unitdir}
 
 %find_lang %{name} --all-name --with-man
+
+%post
+%systemd_post arp-ethers.service
+
+%preun
+%systemd_preun arp-ethers.service
+
+%postun
+%systemd_postun arp-ethers.service
 
 %files -f %{name}.lang
 %doc COPYING

@@ -80,4 +80,4 @@
 #define HAVE_MII 1
 #define HAVE_PLIP_TOOLS 1
 #define HAVE_SERIAL_TOOLS 1
-#define HAVE_SELINUX 0
+#define HAVE_SELINUX 1
