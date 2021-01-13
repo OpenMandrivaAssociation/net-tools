@@ -5,14 +5,14 @@
 
 Summary:	The basic tools for setting up networking
 Name:		net-tools
-Version:	2.0
-Release:	1.%{date}.5
+Version:	2.10
+Release:	1
 License:	GPLv2
 Group:		System/Configuration/Networking
 Url:		http://net-tools.sourceforge.net
 # (tpg) https://github.com/ecki/net-tools
 #git archive --format=tar --remote=git://git.code.sf.net/p/net-tools/code master | xz > net-tools-2.0-$(date +%Y%m%d).tar.xz
-Source0:	net-tools-%{version}.%{date}.tar.xz
+Source0:	https://github.com/ecki/net-tools/archive/%{name}-%{version}.tar.gz
 Source1:	net-tools-config.h
 Source2:	net-tools-config.make
 Source3:	ether-wake.c
@@ -64,7 +64,7 @@ touch ./config.h
 
 %build
 %serverbuild_hardened
-%setup_compile_flags
+%set_cbuild_flags
 %make_build CC=%{__cc}
 %make_build CC=%{__cc} ether-wake
 %{__cc} %{optflags} -pie %{ldflags} -fPIE -o mii-diag mii-diag.c
