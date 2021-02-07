@@ -1,0 +1,84 @@
+From 3e27ced0c24be18dc443f7eb1421c7c3c1755cfe Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tom=C3=A1=C5=A1=20Chv=C3=A1tal?= <tchvatal@suse.com>
+Date: Sun, 18 Jun 2017 08:54:17 +0200
+Subject: [PATCH 6/7] Allow interface stacking
+
+---
+ lib/interface.c | 25 +++++++++++++++----------
+ 1 file changed, 15 insertions(+), 10 deletions(-)
+
+diff -Naur a/lib/interface.c b/lib/interface.c
+--- a/lib/interface.c	2021-01-06 23:22:35.000000000 +0000
++++ b/lib/interface.c	2021-02-07 15:37:02.230333076 +0000
+@@ -210,10 +210,11 @@
+     return err;
+ }
+ 
+-static const char *get_name(char *name, const char *p)
++static const char *get_name(char **namep, const char *p)
+ {
+     while (isspace(*p))
+ 	p++;
++    char *name = *namep = p;
+     while (*p) {
+ 	if (isspace(*p))
+ 	    break;
+@@ -316,9 +317,10 @@
+ static int if_readlist_proc(const char *target)
+ {
+     FILE *fh;
+-    char buf[512];
+     struct interface *ife;
+     int err;
++    char *line = NULL;
++    size_t linelen = 0;
+ 
+     fh = fopen(_PATH_PROCNET_DEV, "r");
+     if (!fh) {
+@@ -326,10 +328,11 @@
+ 			_PATH_PROCNET_DEV, strerror(errno));
+ 		return -2;
+ 	}
+-    if (fgets(buf, sizeof buf, fh))
+-		/* eat line */;
+-    if (fgets(buf, sizeof buf, fh))
+-		/* eat line */;
++    if (getline(&line, &linelen, fh) == -1 /* eat line */
++	|| getline(&line, &linelen, fh) == -1) {
++		err = -1;
++		goto out;
++    }
+ 
+ #if 0				/* pretty, but can't cope with missing fields */
+     fmt = proc_gen_fmt(_PATH_PROCNET_DEV, 1, fh,
+@@ -354,14 +357,14 @@
+     if (!fmt)
+ 	return -1;
+ #else
+-    procnetdev_vsn = procnetdev_version(buf);
++    procnetdev_vsn = procnetdev_version(line);
+ #endif
+ 
+     err = 0;
+-    while (fgets(buf, sizeof buf, fh)) {
++    while (getline(&line, &linelen, fh) != -1) {
+ 	const char *s;
+-	char name[IFNAMSIZ];
+-	s = get_name(name, buf);
++	char *name;
++	s = get_name(&name, line);
+ 	ife = if_cache_add(name);
+ 	get_dev_fields(s, ife);
+ 	ife->statistics_valid = 1;
+@@ -376,6 +379,8 @@
+ #if 0
+     free(fmt);
+ #endif
++  out:
++    free(line);
+     fclose(fh);
+     return err;
+ }
+-- 
+2.13.1
+
