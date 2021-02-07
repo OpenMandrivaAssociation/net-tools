@@ -64,7 +64,6 @@ done
 
 %files -f %{name}.lang
 %doc COPYING
-%{_unitdir}/arp-ethers.service
 /bin/*
 /sbin/*
 %{_bindir}
