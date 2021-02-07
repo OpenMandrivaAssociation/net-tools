@@ -69,3 +69,4 @@ done
 %{_bindir}
 %{_sbindir}
 %{_mandir}/man[58]/*
+%{_mandir}/*/man[58]/*
