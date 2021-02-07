@@ -15,13 +15,11 @@ Patch2:		0002-Do-not-warn-about-interface-socket-not-binded.patch
 Patch4:		0004-By-default-do-not-fopen-anything-in-netrom_gr.patch
 Patch6:		0006-Allow-interface-stacking.patch
 
-%if 0
 BuildRequires:	gettext
 BuildRequires:	pkgconfig(bluez)
 BuildRequires:	kernel-release-headers
 BuildRequires:	pkgconfig(libselinux)
 BuildRequires:	help2man
-%endif
 Requires:	hostname
 Recommends:	traceroute
 
