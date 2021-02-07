@@ -66,7 +66,7 @@ done
 %doc COPYING
 /bin/*
 /sbin/*
-%{_bindir}
-%{_sbindir}
+%{_bindir}/*
+%{_sbindir}/*
 %{_mandir}/man[58]/*
 %{_mandir}/*/man[58]/*
