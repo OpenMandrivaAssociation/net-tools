@@ -60,6 +60,8 @@ for i in netstat ifconfig route; do
     ln -sf %{_bindir}/$i %{buildroot}/bin/$i
 done
 
+%find_lang %{name} --all-name
+
 %files -f %{name}.lang
 %doc COPYING
 %{_unitdir}/arp-ethers.service
