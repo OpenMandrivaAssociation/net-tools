@@ -1,7 +1,7 @@
 Summary:	The basic tools for setting up networking
 Name:		net-tools
 Version:	2.10
-Release:	1
+Release:	2
 License:	GPLv2
 Group:		System/Configuration/Networking
 Url:		https://github.com/ecki/net-tools
@@ -34,7 +34,6 @@ cp %{SOURCE1} ./config.h
 cp %{SOURCE2} ./config.make
 
 %build
-%serverbuild_hardened
 %set_build_flags
 %make_build CC=%{__cc}
 
@@ -51,8 +50,8 @@ for tool in iptunnel ipmaddr; do
 done
 
 # (tpg) provide compat symlinks
-mkdir -p %{buildroot}/sbin
-mkdir -p %{buildroot}/bin
+mkdir -p %{buildroot}/{bin,sbin}
+
 for i in ether-wake nameif plipconfig slattach arp ipmaddr iptunnel; do
     ln -sf %{_sbindir}/$i %{buildroot}/sbin/$i
 done
@@ -68,5 +67,5 @@ done
 /sbin/*
 %{_bindir}/*
 %{_sbindir}/*
-%{_mandir}/man[58]/*
-%{_mandir}/*/man[58]/*
+%doc %{_mandir}/man[58]/*
+%doc %{_mandir}/*/man[58]/*
