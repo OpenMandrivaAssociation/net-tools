@@ -1,7 +1,7 @@
 Summary:	The basic tools for setting up networking
 Name:		net-tools
 Version:	2.10
-Release:	3
+Release:	4
 License:	GPLv2
 Group:		System/Configuration/Networking
 Url:		https://github.com/ecki/net-tools
