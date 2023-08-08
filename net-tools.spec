@@ -1,7 +1,9 @@
+%bcond_without bluetooth
+
 Summary:	The basic tools for setting up networking
 Name:		net-tools
 Version:	2.10
-Release:	4
+Release:	5
 License:	GPLv2
 Group:		System/Configuration/Networking
 Url:		https://github.com/ecki/net-tools
@@ -16,7 +18,9 @@ Patch4:		0004-By-default-do-not-fopen-anything-in-netrom_gr.patch
 Patch6:		0006-Allow-interface-stacking.patch
 
 BuildRequires:	gettext
+%if %{with bluetooth}
 BuildRequires:	pkgconfig(bluez)
+%endif
 BuildRequires:	kernel-release-headers
 BuildRequires:	pkgconfig(libselinux)
 BuildRequires:	help2man
@@ -32,6 +36,11 @@ networking:  ifconfig, netstat, route and others.
 
 cp %{SOURCE1} ./config.h
 cp %{SOURCE2} ./config.make
+
+%if %{without bluetooth}
+sed -i -e 's,^#define HAVE_AFBLUETOOTH 1,#define HAVE_AFBLUETOOTH 0,' config.h
+sed -i -e 's,^HAVE_AFBLUETOOTH=1,# HAVE_AFBLUETOOTH=0,' config.make
+%endif
 
 %build
 %set_build_flags
