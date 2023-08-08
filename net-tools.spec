@@ -35,7 +35,7 @@ cp %{SOURCE2} ./config.make
 
 %build
 %set_build_flags
-%make_build CC=%{__cc}
+%make_build CC="%{__cc}"
 
 %install
 %make_install BINDIR=%{_bindir} SBINDIR=%{_bindir}
