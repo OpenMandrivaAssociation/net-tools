@@ -43,6 +43,16 @@ sed -i -e 's,^#define HAVE_AFBLUETOOTH 1,#define HAVE_AFBLUETOOTH 0,' config.h
 sed -i -e 's,^HAVE_AFBLUETOOTH=1,# HAVE_AFBLUETOOTH=0,' config.make
 %endif
 
+# Current kernel UAPI no longer ships these amateur-radio / legacy headers.
+for proto in ROSE NETROM IPX ASH; do
+	hdr=linux/$(echo $proto | tr A-Z a-z).h
+	echo "#include <$hdr>" | %{__cc} -E - >/dev/null 2>&1 && continue
+	sed -i -e "s,^#define HAVE_AF${proto} 1,#define HAVE_AF${proto} 0," \
+		-e "s,^#define HAVE_HW${proto} 1,#define HAVE_HW${proto} 0," config.h
+	sed -i -e "s,^HAVE_AF${proto}=1,# HAVE_AF${proto}=0," \
+		-e "s,^HAVE_HW${proto}=1,# HAVE_HW${proto}=0," config.make
+done
+
 %build
 %set_build_flags
 %make_build CC="%{__cc}"
